@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Comprovante de Locação</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; color: #333; }
+        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+        .title { font-size: 24px; font-weight: bold; }
+        .info-box { background-color: #f9f9f9; border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; }
+        .label { font-weight: bold; color: #555; }
+        .footer { text-align: center; font-size: 12px; margin-top: 50px; color: #777; border-top: 1px solid #ccc; padding-top: 10px; }
+        .signature { margin-top: 50px; border-top: 1px solid #000; width: 200px; margin-left: auto; margin-right: auto; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="title">LOCADORA - COMPROVANTE</div>
+    <p>Recibo de Locação de Filme</p>
+</div>
+
+<div class="info-box">
+    <p><span class="label">Código da Locação:</span> <span th:text="${'#' + locacao.id}">#000</span></p>
+    <p><span class="label">Data da Locação:</span> <span th:text="${#temporals.format(locacao.dataLocacao, 'dd/MM/yyyy')}">01/01/2024</span></p>
+</div>
+
+<h3>Dados do Cliente</h3>
+<div class="info-box">
+    <p><span class="label">Nome:</span> <span th:text="${locacao.cliente.nome}">Fulano</span></p>
+    <p><span class="label">CPF:</span> <span th:text="${locacao.cliente.cpf}">000.000.000-00</span></p>
+</div>
+
+<h3>Filme Locado</h3>
+<div class="info-box">
+    <p><span class="label">Título:</span> <span th:text="${locacao.filme.titulo}">Matrix</span></p>
+    <p><span class="label">Diretor:</span> <span th:text="${locacao.filme.diretor}">Wachowski</span></p>
+
+    <hr />
+
+    <p><span class="label">Devolução Prevista:</span> <span th:text="${#temporals.format(locacao.dataDevolucaoPrevista, 'dd/MM/yyyy')}">05/01/2024</span></p>
+</div>
+
+<div class="footer">
+    <p>Agradecemos a preferência!</p>
+    <p>Multa de R$ 5,00 por dia em caso de atraso.</p>
+
+    <div class="signature">
+        Assinatura do Responsável
+    </div>
+</div>
+
+</body>
+</html>

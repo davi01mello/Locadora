@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro de Filme 🎬</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Novo Filme</h4>
+                </div>
+                <div class="card-body">
+
+                    <form th:action="@{/filmes/novo}" th:object="${filmeDto}" method="post">
+                        <input type="hidden" th:field="*{id}">
+
+                        <div class="mb-3">
+                            <label class="form-label">Título do Filme</label>
+                            <input type="text" th:field="*{titulo}" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Diretor</label>
+                            <input type="text" th:field="*{diretor}" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Ano de Lançamento</label>
+                            <input type="number" th:field="*{anoLancamento}" class="form-control" placeholder="Ex: 1999" required>
+                            <div class="text-danger small" th:if="${#fields.hasErrors('anoLancamento')}" th:errors="*{anoLancamento}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Categoria</label>
+                            <select th:field="*{categoriaId}" class="form-select" required>
+                                <option value="" disabled selected>Selecione...</option>
+                                <option th:each="cat : ${categorias}"
+                                        th:value="${cat.id}"
+                                        th:text="${cat.nome}"></option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">Salvar Filme</button>
+                            <a href="/filmes" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
