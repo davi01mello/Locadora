@@ -27,6 +27,15 @@ public class Filme {
     @NotNull(message = "Você deve selecionar uma categoria")
     private Categoria categoria;
 
+    // --- NOVOS CAMPOS PARA A IA ---
+    @Column(length = 4000) // Texto longo para a sinopse não cortar
+    private String sinopse;
+
+    private String imagemUrl; // Link da foto da capa
+
+    private String classificacao; // Ex: "14 anos", "Livre"
+    // ------------------------------
+
     public Filme() {
     }
 
@@ -37,7 +46,7 @@ public class Filme {
         this.categoria = categoria;
     }
 
-    // Getters e Setters
+    // Getters e Setters Originais
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -52,4 +61,14 @@ public class Filme {
 
     public Categoria getCategoria() { return categoria; }
     public void setCategoria(Categoria categoria) { this.categoria = categoria; }
+
+    // --- NOVOS GETTERS E SETTERS ---
+    public String getSinopse() { return sinopse; }
+    public void setSinopse(String sinopse) { this.sinopse = sinopse; }
+
+    public String getImagemUrl() { return imagemUrl; }
+    public void setImagemUrl(String imagemUrl) { this.imagemUrl = imagemUrl; }
+
+    public String getClassificacao() { return classificacao; }
+    public void setClassificacao(String classificacao) { this.classificacao = classificacao; }
 }
