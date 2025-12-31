@@ -3,6 +3,7 @@ package br.com.locadora.controllers;
 import br.com.locadora.dtos.LocacaoDto;
 import br.com.locadora.models.Filme;
 import br.com.locadora.models.Locacao;
+import br.com.locadora.repositories.CategoriaRepository; // <--- NOVO IMPORT
 import br.com.locadora.services.ClienteService;
 import br.com.locadora.services.FilmeService;
 import br.com.locadora.services.LocacaoService;
@@ -13,9 +14,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult; // Importante para validar erro
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.Valid; // Importante para validar form
+import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("/locacoes")
@@ -33,6 +34,10 @@ public class LocacaoWebController {
     @Autowired
     private PdfService pdfService;
 
+    // --- INJEÇÃO DO REPOSITÓRIO DE CATEGORIAS ---
+    @Autowired
+    private CategoriaRepository categoriaRepository;
+
     @GetMapping
     public String listar(Model model) {
         model.addAttribute("locacoes", service.buscarTodos());
@@ -43,7 +48,11 @@ public class LocacaoWebController {
     public String formularioNovo(Model model) {
         model.addAttribute("locacaoDto", new LocacaoDto());
         model.addAttribute("clientes", clienteService.buscarTodos());
+
+        // --- MANDANDO FILMES E CATEGORIAS PARA O HTML ---
         model.addAttribute("filmes", filmeService.buscarTodos());
+        model.addAttribute("categorias", categoriaRepository.findAll()); // <--- NOVO
+
         return "formulario-locacao";
     }
 
@@ -53,6 +62,7 @@ public class LocacaoWebController {
         if (result.hasErrors()) {
             model.addAttribute("clientes", clienteService.buscarTodos());
             model.addAttribute("filmes", filmeService.buscarTodos());
+            model.addAttribute("categorias", categoriaRepository.findAll()); // <--- NOVO (Para não sumir se der erro)
             return "formulario-locacao";
         }
 
@@ -64,6 +74,7 @@ public class LocacaoWebController {
             result.rejectValue("filmeId", "error.filme", "Este filme está esgotado! 🚫");
             model.addAttribute("clientes", clienteService.buscarTodos());
             model.addAttribute("filmes", filmeService.buscarTodos());
+            model.addAttribute("categorias", categoriaRepository.findAll()); // <--- NOVO
             return "formulario-locacao";
         }
 

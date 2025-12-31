@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Nova Locação 🛒</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body class="bg-light">
 
@@ -36,13 +37,24 @@
                             </select>
                         </div>
 
+                        <div class="mb-2">
+                            <label class="form-label fw-bold text-muted small"><i class="bi bi-funnel-fill me-1"></i>Filtrar por Categoria</label>
+                            <select id="filtroCategoria" class="form-select form-select-sm border-secondary">
+                                <option value="">Todas as Categorias</option>
+                                <option th:each="cat : ${categorias}"
+                                        th:value="${cat.id}"
+                                        th:text="${cat.nome}"></option>
+                            </select>
+                        </div>
+
                         <div class="mb-3">
                             <label class="form-label fw-bold">Qual filme?</label>
-                            <select th:field="*{filmeId}" class="form-select" required>
+                            <select th:field="*{filmeId}" id="filmeSelect" class="form-select" required>
                                 <option value="" disabled selected>Selecione um filme...</option>
 
                                 <option th:each="filme : ${filmes}"
                                         th:value="${filme.id}"
+                                        th:data-category="${filme.categoria.id}"
                                         th:disabled="${filme.estoque == 0}"
                                         th:text="${filme.titulo} + ' (Estoque: ' + ${filme.estoque} + ')' + (${filme.estoque == 0} ? ' - ESGOTADO' : '')">
                                 </option>
@@ -67,5 +79,45 @@
     </div>
 </div>
 
+<script>
+    // --- LÓGICA DO FILTRO DE CATEGORIAS 🧠 ---
+    document.addEventListener("DOMContentLoaded", function() {
+        const filtro = document.getElementById('filtroCategoria');
+        const filmesSelect = document.getElementById('filmeSelect');
+
+        // 1. Salva todas as opções originais na memória
+        // (Porque se a gente remover do HTML, perde pra sempre)
+        const todasAsOpcoes = Array.from(filmesSelect.options);
+
+        filtro.addEventListener('change', function() {
+            const categoriaIdSelecionada = this.value;
+
+            // 2. Limpa o Select de Filmes
+            filmesSelect.innerHTML = '';
+
+            // 3. Adiciona de volta apenas quem passou no filtro
+            todasAsOpcoes.forEach(opcao => {
+                // A opção "Selecione um filme..." (que tem value vazio) sempre volta
+                if (opcao.value === "") {
+                    filmesSelect.appendChild(opcao);
+                    return;
+                }
+
+                // Pega a categoria guardada no atributo data-category
+                const categoriaDoFilme = opcao.getAttribute('data-category');
+
+                // Se o filtro for "Todas" OU a categoria bater, adiciona
+                if (categoriaIdSelecionada === "" || categoriaDoFilme === categoriaIdSelecionada) {
+                    filmesSelect.appendChild(opcao);
+                }
+            });
+
+            // Reseta a seleção para "Selecione..."
+            filmesSelect.value = "";
+        });
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
