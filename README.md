@@ -1,4 +1,5 @@
-# 🎬 Locadora System
+# 🎬 Locadora System(read.me sujeito a atualizações)
+
 
 > Sistema de gestão de locadora de filmes desenvolvido com Java, Spring Boot e Inteligência Artificial.
 
