@@ -1,18 +1,21 @@
 package br.com.locadora.controllers;
 
 import br.com.locadora.dtos.LocacaoDto;
-import br.com.locadora.models.Locacao; // Importante para o objeto Locacao
+import br.com.locadora.models.Filme;
+import br.com.locadora.models.Locacao;
 import br.com.locadora.services.ClienteService;
 import br.com.locadora.services.FilmeService;
 import br.com.locadora.services.LocacaoService;
-import br.com.locadora.services.PdfService; // Import do novo serviço
+import br.com.locadora.services.PdfService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders; // Para configurar o download
-import org.springframework.http.MediaType;   // Para dizer que é PDF
-import org.springframework.http.ResponseEntity; // Para retornar o arquivo
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult; // Importante para validar erro
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid; // Importante para validar form
 
 @Controller
 @RequestMapping("/locacoes")
@@ -27,7 +30,6 @@ public class LocacaoWebController {
     @Autowired
     private ClienteService clienteService;
 
-    // --- INJEÇÃO DO SERVIÇO DE PDF ---
     @Autowired
     private PdfService pdfService;
 
@@ -45,30 +47,57 @@ public class LocacaoWebController {
         return "formulario-locacao";
     }
 
+    // --- SALVAR COM LÓGICA DE ESTOQUE 🧠 ---
     @PostMapping("/novo")
-    public String salvar(@ModelAttribute LocacaoDto dto) {
+    public String salvar(@Valid @ModelAttribute LocacaoDto dto, BindingResult result, Model model) {
+        if (result.hasErrors()) {
+            model.addAttribute("clientes", clienteService.buscarTodos());
+            model.addAttribute("filmes", filmeService.buscarTodos());
+            return "formulario-locacao";
+        }
+
+        // 1. Busca o filme para checar o estoque
+        Filme filme = filmeService.buscarPorId(dto.getFilmeId());
+
+        // 2. Se o estoque for 0 ou menor, BLOQUEIA!
+        if (filme.getEstoque() <= 0) {
+            result.rejectValue("filmeId", "error.filme", "Este filme está esgotado! 🚫");
+            model.addAttribute("clientes", clienteService.buscarTodos());
+            model.addAttribute("filmes", filmeService.buscarTodos());
+            return "formulario-locacao";
+        }
+
+        // 3. Se tem estoque, diminui 1
+        filme.setEstoque(filme.getEstoque() - 1);
+        filmeService.salvar(filme); // Atualiza o filme no banco
+
+        // 4. Salva a locação
         service.cadastrar(dto);
         return "redirect:/locacoes";
     }
 
-    // --- RECEBE O CLIQUE DO BOTÃO DEVOLVER ---
+    // --- DEVOLVER COM REPOSIÇÃO DE ESTOQUE 🔄 ---
     @PostMapping("/devolver/{id}")
     public String devolver(@PathVariable Long id) {
+        // 1. Busca a locação para saber qual filme é
+        Locacao locacao = service.buscarPorId(id);
+
+        // Só repõe estoque se ainda não foi devolvido
+        if (locacao.getDataDevolucaoReal() == null) {
+            Filme filme = locacao.getFilme();
+            filme.setEstoque(filme.getEstoque() + 1); // Aumenta 1
+            filmeService.salvar(filme);
+        }
+
+        // 2. Realiza a devolução normal
         service.devolver(id);
         return "redirect:/locacoes";
     }
 
-    //  BAIXAR COMPROVANTE PDF ---
     @GetMapping("/comprovante/{id}")
     public ResponseEntity<byte[]> baixarComprovante(@PathVariable Long id) {
-        // 1. Busca a locação pelo ID
-        // Se der erro vermelho aqui, adicione o método buscarPorId no LocacaoService (veja abaixo)
         Locacao locacao = service.buscarPorId(id);
-
-        // 2. Gera o PDF usando o serviço novo
         byte[] pdfBytes = pdfService.gerarComprovanteLocacao(locacao);
-
-        // 3. Retorna o arquivo configurado para download
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=comprovante_locacao_" + id + ".pdf")
                 .contentType(MediaType.APPLICATION_PDF)

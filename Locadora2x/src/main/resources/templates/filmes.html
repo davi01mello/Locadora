@@ -20,15 +20,33 @@
         .movie-card {
             border: none; border-radius: 15px; overflow: hidden; transition: all 0.3s ease;
             background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            position: relative; /* Necessário para posicionar o badge */
         }
         .movie-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.1); }
+
+        /* Capa do filme (Atualizado para suportar imagem de fundo) */
         .movie-poster-placeholder {
-            height: 200px; background: linear-gradient(45deg, #3498db, #8e44ad);
+            height: 250px;
+            background: linear-gradient(45deg, #3498db, #8e44ad);
             display: flex; align-items: center; justify-content: center; color: white; font-size: 3rem;
+            background-size: cover; background-position: center;
         }
+
         .card-body { padding: 1.25rem; }
         .card-title { font-weight: 600; font-size: 1.1rem; margin-bottom: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .badge-category { background-color: #e9ecef; color: #495057; font-weight: 500; padding: 0.4em 0.8em; border-radius: 10px; }
+
+        /* --- NOVO CSS: BADGES DE ESTOQUE --- */
+        .stock-badge {
+            position: absolute; top: 10px; right: 10px;
+            padding: 5px 12px; border-radius: 20px;
+            font-size: 0.8rem; font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 10;
+        }
+        .stock-ok { background-color: #2ecc71; color: white; }
+        .stock-out { background-color: #e74c3c; color: white; }
+        /* ----------------------------------- */
+
         .card-actions { border-top: 1px solid #f0f0f0; padding-top: 1rem; margin-top: 1rem; display: flex; justify-content: space-between; }
         .btn-action { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s; }
         .btn-edit { background-color: #e3f2fd; color: #3498db; }
@@ -78,15 +96,26 @@
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
         <div class="col" th:each="filme : ${filmes}">
             <div class="card movie-card h-100">
-                <div class="movie-poster-placeholder"><i class="bi bi-play-circle"></i></div>
+
+                <span th:if="${filme.estoque > 0}" class="stock-badge stock-ok">
+                    <i class="bi bi-box-seam me-1"></i><span th:text="${filme.estoque}">3</span> un.
+                </span>
+                <span th:if="${filme.estoque == 0}" class="stock-badge stock-out">
+                    <i class="bi bi-x-circle me-1"></i>Esgotado
+                </span>
+                <div class="movie-poster-placeholder"
+                     th:style="${filme.imagemUrl != null and filme.imagemUrl != ''} ? 'background-image: url(' + ${filme.imagemUrl} + ')' : ''">
+                    <i th:if="${filme.imagemUrl == null or filme.imagemUrl == ''}" class="bi bi-play-circle"></i>
+                </div>
+
                 <div class="card-body d-flex flex-column">
-                    <h5 class="card-title" th:text="${filme.titulo}">Título</h5>
+                    <h5 class="card-title" th:text="${filme.titulo}" th:title="${filme.titulo}">Título</h5>
 
                     <p class="card-text text-muted mb-2">
                         <i class="bi bi-calendar-event me-1"></i><span th:text="${filme.anoLancamento}">2023</span>
                     </p>
 
-                    <p class="card-text text-muted mb-3 small">
+                    <p class="card-text text-muted mb-3 small text-truncate">
                         <i class="bi bi-person-video me-1"></i>Dir. <span th:text="${filme.diretor}">Diretor</span>
                     </p>
 

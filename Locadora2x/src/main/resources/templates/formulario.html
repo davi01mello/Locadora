@@ -8,7 +8,6 @@
 
     <style>
         body { background-color: #f8f9fa; }
-        /* Estilo da área onde aparece a foto */
         .card-preview {
             border: 2px dashed #ccc;
             min-height: 350px;
@@ -21,7 +20,7 @@
         }
         .card-preview img {
             max-width: 100%;
-            display: none; /* A imagem começa escondida */
+            display: none;
         }
         .preview-text {
             text-align: center; color: #6c757d;
@@ -55,9 +54,9 @@
                         </div>
                         <small class="text-muted">Busca sinopse, capa e dados técnicos automaticamente.</small>
                     </div>
+
                     <form th:action="@{/filmes/novo}" th:object="${filmeDto}" method="post">
                         <input type="hidden" th:field="*{id}">
-
                         <input type="hidden" th:field="*{imagemUrl}" id="imagemUrl">
 
                         <div class="row">
@@ -68,13 +67,18 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-5 mb-3">
                                         <label class="form-label">Diretor</label>
                                         <input type="text" th:field="*{diretor}" id="diretor" class="form-control" required>
                                     </div>
-                                    <div class="col-md-3 mb-3">
+                                    <div class="col-md-2 mb-3">
                                         <label class="form-label">Ano</label>
                                         <input type="number" th:field="*{anoLancamento}" id="ano" class="form-control" required>
+                                    </div>
+
+                                    <div class="col-md-2 mb-3">
+                                        <label class="form-label fw-bold text-primary">Estoque</label>
+                                        <input type="number" th:field="*{estoque}" id="estoque" class="form-control" required min="1">
                                     </div>
                                     <div class="col-md-3 mb-3">
                                         <label class="form-label">Classif.</label>
@@ -126,33 +130,31 @@
 
 <script>
     function buscarNaInternet() {
-        // 1. Pega o texto da busca
         let termo = document.getElementById('buscaOmdb').value;
         if (!termo) { alert("Digite o nome do filme!"); return; }
 
-        // Muda botão para "Carregando"
         let btn = document.querySelector('button[onclick="buscarNaInternet()"]');
         let textoOriginal = btn.innerHTML;
         btn.innerHTML = '...';
         btn.disabled = true;
 
-        // 2. Chama o Java
         fetch('/filmes/buscar-omdb?titulo=' + termo)
             .then(response => response.json())
             .then(data => {
                 if (!data) { alert("Filme não encontrado!"); return; }
 
-                // 3. Preenche os campos
                 document.getElementById('titulo').value = data.titulo || "";
                 document.getElementById('diretor').value = data.diretor || "";
                 document.getElementById('ano').value = data.anoLancamento || "";
                 document.getElementById('sinopse').value = data.sinopse || "";
                 document.getElementById('classificacao').value = data.classificacao || "";
 
-                // 4. Mostra a Imagem
+                // Defino estoque padrão como 3 se vier da IA, só pra ajudar
+                document.getElementById('estoque').value = 3;
+
                 let imgUrl = data.imagemUrl;
                 if (imgUrl && imgUrl !== "N/A") {
-                    document.getElementById('imagemUrl').value = imgUrl; // Salva no hidden
+                    document.getElementById('imagemUrl').value = imgUrl;
                     let imgTag = document.getElementById('previewImg');
                     imgTag.src = imgUrl;
                     imgTag.style.display = "block";
@@ -166,7 +168,6 @@
             });
     }
 </script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
