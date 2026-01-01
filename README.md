@@ -47,5 +47,5 @@ Bash
 mvn spring-boot:run
 Acesse no navegador: http://localhost:8080
 
-👤 Autor
+👤 Autor:
 Desenvolvido por Davi Mello.
