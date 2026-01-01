@@ -5,7 +5,7 @@
 ![Status do Projeto](https://img.shields.io/badge/Status-Finalizado-green) ![Java Version](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3-brightgreen) ![License](https://img.shields.io/badge/License-MIT-blue)
 
 ![Dashboard Preview](prints/dashboard-preview.jpg)
-*(Substitua esta linha por um print real da sua tela Home e salve na pasta prints)*
+
 
 ---
 
