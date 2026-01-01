@@ -18,6 +18,14 @@
 
                     <form th:action="@{/locacoes/novo}" th:object="${locacaoDto}" method="post">
 
+                        <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+                            <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+                        </div>
+
+                        <div th:if="${#fields.hasErrors('filmeId')}" class="alert alert-danger">
+                            <p th:errors="*{filmeId}"></p>
+                        </div>
+
                         <div class="mb-3">
                             <label class="form-label fw-bold">Quem vai alugar?</label>
                             <select th:field="*{clienteId}" class="form-select" required>
@@ -32,9 +40,12 @@
                             <label class="form-label fw-bold">Qual filme?</label>
                             <select th:field="*{filmeId}" class="form-select" required>
                                 <option value="" disabled selected>Selecione um filme...</option>
+
                                 <option th:each="filme : ${filmes}"
                                         th:value="${filme.id}"
-                                        th:text="${filme.titulo}"></option>
+                                        th:disabled="${filme.estoque == 0}"
+                                        th:text="${filme.titulo} + ' (Estoque: ' + ${filme.estoque} + ')' + (${filme.estoque == 0} ? ' - ESGOTADO' : '')">
+                                </option>
                             </select>
                         </div>
 
