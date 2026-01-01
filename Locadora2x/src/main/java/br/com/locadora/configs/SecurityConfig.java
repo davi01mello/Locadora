@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -13,20 +14,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // 1. DESATIVA O CSRF
+                .csrf(AbstractHttpConfigurer::disable)
+
+                // 2. CONFIGURA AS PERMISSÕES
                 .authorizeHttpRequests((requests) -> requests
-                        // Permitir que qualquer um veja a página de login e arquivos estáticos (se tiver)
-                        .requestMatchers("/login", "/css/**", "/js/**", "/images/**").permitAll()
-                        // Qualquer outra página exige autenticação (estar logado)
+                        // Libera arquivos estáticos (CSS, JS, Imagens) para a tela não ficar "quebrada"
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+                        // Libera a página de login
+                        .requestMatchers("/login").permitAll()
+                        // Todo o resto precisa de login (Inclusive a Home e a API da IA)
                         .anyRequest().authenticated()
                 )
+
+                // 3. CONFIGURA O LOGIN
                 .formLogin((form) -> form
-                        .loginPage("/login") // Diz para o Spring: "Use a MINHA tela, não a padrão"
-                        .defaultSuccessUrl("/filmes", true) // Se logar com sucesso, vá para /filmes
+                        .loginPage("/login") // Usa sua tela bonita
+                        .defaultSuccessUrl("/", true) // Vai pra Home ao logar
                         .permitAll()
                 )
+
+                // 4. CONFIGURA O LOGOUT
                 .logout((logout) -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout") // Se sair, volta pro login com aviso
+                        .logoutSuccessUrl("/login?logout")
                         .permitAll()
                 );
 

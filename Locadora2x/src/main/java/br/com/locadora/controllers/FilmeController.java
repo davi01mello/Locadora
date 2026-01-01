@@ -86,7 +86,7 @@ public class FilmeController {
         return "redirect:/filmes";
     }
 
-    // --- ROTA DA IA (COM LOG DE ERRO) ---
+    // --- ROTA DA IA
     @GetMapping("/buscar-omdb")
     @ResponseBody
     public FilmeDto buscarOmdb(@RequestParam String titulo) {

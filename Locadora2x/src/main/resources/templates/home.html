@@ -34,6 +34,16 @@
 
         .chart-container { position: relative; height: 250px; width: 100%; display: flex; justify-content: center; }
         .chart-title { font-size: 1rem; font-weight: 700; color: #34495e; margin-bottom: 1rem; text-align: center; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px;}
+
+        /* Botão da IA pulsando */
+        .btn-ia {
+            background-color: white; color: #2c3e50; font-weight: bold; border: none;
+            transition: all 0.3s ease;
+        }
+        .btn-ia:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -46,6 +56,11 @@
                 <li class="nav-item"><a class="nav-link" href="/filmes">Filmes</a></li>
                 <li class="nav-item"><a class="nav-link" href="/clientes">Clientes</a></li>
                 <li class="nav-item"><a class="nav-link" href="/locacoes">Locações</a></li>
+                <li class="nav-item ms-3">
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Sair</button>
+                    </form>
+                </li>
             </ul>
         </div>
     </div>
@@ -54,7 +69,11 @@
 <div class="hero-section text-center">
     <div class="container">
         <h2 class="fw-bold">Painel de Controle 🕹️</h2>
-        <p class="opacity-75 mb-0">Visão geral em tempo real</p>
+        <p class="opacity-75 mb-4">Visão geral em tempo real</p>
+
+        <button onclick="gerarInsights()" class="btn btn-light rounded-pill px-4 py-2 shadow-sm btn-ia">
+            <i class="bi bi-stars text-warning me-2"></i>Gerar Insights com IA
+        </button>
     </div>
 </div>
 
@@ -96,7 +115,6 @@
     </div>
 
     <div class="row g-4">
-
         <div class="col-md-4">
             <div class="card stat-card p-4">
                 <div class="chart-title"><i class="bi bi-pie-chart-fill me-2 text-primary"></i>Por Categoria</div>
@@ -126,10 +144,44 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script th:inline="javascript">
-    // --- GRÁFICO 1: CATEGORIAS ---
+    // --- LÓGICA DA IA (O PULU DO GATO) ---
+    function gerarInsights() {
+        Swal.fire({
+            title: 'Consultando a IA...',
+            text: 'O Google Gemini está analisando seus dados 🧠',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        fetch('/api/analise-ia')
+            .then(response => {
+                if (!response.ok) throw new Error("Erro na requisição");
+                return response.text();
+            })
+            .then(data => {
+                Swal.fire({
+                    title: '✨ Análise Estratégica',
+                    html: '<div style="text-align: left; font-size: 0.95rem; line-height: 1.6;">' + data + '</div>',
+                    icon: 'info',
+                    width: '600px',
+                    confirmButtonText: 'Fechar',
+                    confirmButtonColor: '#2c3e50'
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire('Ops!', 'Não foi possível falar com a IA agora.', 'error');
+            });
+    }
+
+    // --- GRÁFICOS (Mantidos do seu código original) ---
+    // Gráfico de Categorias
     new Chart(document.getElementById('chartCategoria'), {
         type: 'doughnut',
         data: {
@@ -143,7 +195,7 @@
         options: { plugins: { legend: { position: 'bottom' } }, maintainAspectRatio: false }
     });
 
-    // --- GRÁFICO 2: TOP CLIENTES ---
+    // Gráfico de Clientes
     new Chart(document.getElementById('chartClientes'), {
         type: 'bar',
         data: {
@@ -156,20 +208,20 @@
             }]
         },
         options: {
-            indexAxis: 'y', // 'y' faz as barras ficarem horizontais
+            indexAxis: 'y',
             plugins: { legend: { display: false } },
             maintainAspectRatio: false
         }
     });
 
-    // --- GRÁFICO 3: STATUS ---
+    // Gráfico de Status
     new Chart(document.getElementById('chartStatus'), {
         type: 'pie',
         data: {
             labels: ['Em Aberto', 'Devolvidos'],
             datasets: [{
                 data: /*[[${statusData}]]*/ [],
-                backgroundColor: ['#e74c3c', '#2ecc71'], // Vermelho para Aberto, Verde para Devolvido
+                backgroundColor: ['#e74c3c', '#2ecc71'],
                 borderWidth: 0
             }]
         },
