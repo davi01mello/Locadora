@@ -8,22 +8,22 @@
 
     <style>
         body { background-color: #f8f9fa; }
+
+        /* ESTILO DA ÁREA DE PREVIEW DA IMAGEM */
         .card-preview {
             border: 2px dashed #ccc;
             min-height: 350px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #e9ecef;
-            border-radius: 10px;
-            overflow: hidden;
+            height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            background-color: #e9ecef; border-radius: 10px; overflow: hidden;
+            position: relative;
         }
         .card-preview img {
-            max-width: 100%;
-            display: none;
+            width: 100%; height: 100%; object-fit: cover;
+            display: none; z-index: 2; position: relative;
         }
         .preview-text {
-            text-align: center; color: #6c757d;
+            text-align: center; color: #6c757d; position: absolute; z-index: 1;
         }
     </style>
 </head>
@@ -47,12 +47,12 @@
                     <div class="alert alert-light border mb-4 shadow-sm">
                         <label class="form-label fw-bold text-success">✨ Preenchimento Automático (IA)</label>
                         <div class="input-group">
-                            <input type="text" id="buscaOmdb" class="form-control" placeholder="Digite o nome em Inglês (ex: Avengers, Titanic)...">
+                            <input type="text" id="buscaOmdb" class="form-control" placeholder="Nome em Inglês (ex: Matrix)...">
                             <button class="btn btn-outline-success" type="button" onclick="buscarNaInternet()">
                                 <i class="bi bi-search me-1"></i> Pesquisar
                             </button>
                         </div>
-                        <small class="text-muted">Busca sinopse, capa e dados técnicos automaticamente.</small>
+                        <small class="text-muted">Busca sinopse, capa e dados técnicos.</small>
                     </div>
 
                     <form th:action="@{/filmes/novo}" th:object="${filmeDto}" method="post">
@@ -67,33 +67,34 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-md-5 mb-3">
+                                    <div class="col-md-6 mb-3">
                                         <label class="form-label">Diretor</label>
                                         <input type="text" th:field="*{diretor}" id="diretor" class="form-control" required>
                                     </div>
-                                    <div class="col-md-2 mb-3">
+                                    <div class="col-md-3 mb-3">
                                         <label class="form-label">Ano</label>
                                         <input type="number" th:field="*{anoLancamento}" id="ano" class="form-control" required>
                                     </div>
-
-                                    <div class="col-md-2 mb-3">
+                                    <div class="col-md-3 mb-3">
                                         <label class="form-label fw-bold text-primary">Estoque</label>
                                         <input type="number" th:field="*{estoque}" id="estoque" class="form-control" required min="1">
                                     </div>
-                                    <div class="col-md-3 mb-3">
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
                                         <label class="form-label">Classif.</label>
                                         <input type="text" th:field="*{classificacao}" id="classificacao" class="form-control">
                                     </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label">Categoria</label>
-                                    <select th:field="*{categoriaId}" class="form-select" required>
-                                        <option value="" disabled selected>Selecione...</option>
-                                        <option th:each="cat : ${categorias}"
-                                                th:value="${cat.id}"
-                                                th:text="${cat.nome}"></option>
-                                    </select>
+                                    <div class="col-md-8 mb-3">
+                                        <label class="form-label">Categoria</label>
+                                        <select th:field="*{categoriaId}" class="form-select" required>
+                                            <option value="" disabled selected>Selecione...</option>
+                                            <option th:each="cat : ${categorias}"
+                                                    th:value="${cat.id}"
+                                                    th:text="${cat.nome}"></option>
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div class="mb-3">
@@ -138,18 +139,28 @@
         btn.innerHTML = '...';
         btn.disabled = true;
 
-        fetch('/filmes/buscar-omdb?titulo=' + termo)
-            .then(response => response.json())
+        console.log("Tentando buscar: " + termo);
+
+        fetch('/filmes/buscar-omdb?titulo=' + encodeURIComponent(termo))
+            .then(response => {
+                console.log("Status HTTP: " + response.status);
+                if (!response.ok) {
+                    throw new Error('Erro na conexão com o Servidor (Status ' + response.status + ')');
+                }
+                return response.json();
+            })
             .then(data => {
-                if (!data) { alert("Filme não encontrado!"); return; }
+                console.log("Dados recebidos:", data);
+                if (!data) {
+                    alert("Filme não encontrado na API!");
+                    return;
+                }
 
                 document.getElementById('titulo').value = data.titulo || "";
                 document.getElementById('diretor').value = data.diretor || "";
                 document.getElementById('ano').value = data.anoLancamento || "";
                 document.getElementById('sinopse').value = data.sinopse || "";
                 document.getElementById('classificacao').value = data.classificacao || "";
-
-                // Defino estoque padrão como 3 se vier da IA, só pra ajudar
                 document.getElementById('estoque').value = 3;
 
                 let imgUrl = data.imagemUrl;
@@ -159,15 +170,21 @@
                     imgTag.src = imgUrl;
                     imgTag.style.display = "block";
                     document.getElementById('placeholder').style.display = "none";
+                } else {
+                    alert("Dados encontrados, mas sem capa.");
                 }
             })
-            .catch(err => console.error(err))
+            .catch(err => {
+                console.error("ERRO DETALHADO NO CONSOLE:", err);
+                alert("Erro ao buscar! Abra o Console (F12) para ver o detalhe vermelho.");
+            })
             .finally(() => {
                 btn.innerHTML = textoOriginal;
                 btn.disabled = false;
             });
     }
 </script>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

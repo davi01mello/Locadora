@@ -138,9 +138,16 @@
                         <i class="bi bi-person-video me-1"></i>Dir. <span th:text="${filme.diretor}">Diretor</span>
                     </p>
 
-                    <div class="mb-3">
+                    <div class="mb-3 d-flex gap-2 flex-wrap">
                         <span class="badge badge-category">
                             <i class="bi bi-tag-fill me-1"></i><span th:text="${filme.categoria.nome}">Categoria</span>
+                        </span>
+
+                        <span th:if="${filme.classificacao != null}"
+                              class="badge rounded-pill border"
+                              th:classappend="${filme.classificacao == 'Livre'} ? 'text-bg-success' : (${filme.classificacao == '16 anos' or filme.classificacao == '18 anos'} ? 'text-bg-danger' : 'text-bg-warning')"
+                              th:text="${filme.classificacao}">
+                            12 anos
                         </span>
                     </div>
 

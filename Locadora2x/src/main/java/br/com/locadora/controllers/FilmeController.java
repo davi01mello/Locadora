@@ -5,68 +5,51 @@ import br.com.locadora.models.Filme;
 import br.com.locadora.repositories.CategoriaRepository;
 import br.com.locadora.repositories.FilmeRepository;
 import br.com.locadora.services.FilmeService;
+import br.com.locadora.services.OmdbService; // <--- O IMPORT TEM QUE ESTAR AQUI
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller; // Importante: @Controller
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller // Define que este arquivo controla as telas HTML
-@RequestMapping("/filmes") // Define a rota base como /filmes
+@Controller
+@RequestMapping("/filmes")
 public class FilmeController {
 
-    @Autowired
-    private FilmeRepository filmeRepository; // Usando repository direto para facilitar a busca
+    @Autowired private FilmeRepository filmeRepository;
+    @Autowired private FilmeService service;
+    @Autowired private CategoriaRepository categoriaRepository;
 
-    @Autowired
-    private FilmeService service; // Usando service para salvar/deletar (regras de negocio)
+    @Autowired private OmdbService omdbService; // <--- INJEÇÃO DO SERVIÇO
 
-    @Autowired
-    private CategoriaRepository categoriaRepository; // Para o filtro
-
-    // 1. TELA PRINCIPAL (CATÁLOGO + FILTRO) 🎬
     @GetMapping
     public String listar(Model model, @RequestParam(required = false) String busca) {
-        // Lógica de busca por texto
-        List<Filme> filmes;
-        if (busca != null && !busca.isEmpty()) {
-            filmes = filmeRepository.findByTituloContainingIgnoreCaseOrDiretorContainingIgnoreCase(busca, busca);
-        } else {
-            filmes = filmeRepository.findAll();
-        }
-
-        // Envia os filmes para a tela
+        List<Filme> filmes = (busca != null && !busca.isEmpty()) ?
+                filmeRepository.findByTituloContainingIgnoreCaseOrDiretorContainingIgnoreCase(busca, busca) :
+                filmeRepository.findAll();
         model.addAttribute("filmes", filmes);
-
-        // Envia as categorias para o Dropdown de Filtro
         model.addAttribute("categorias", categoriaRepository.findAll());
-
-        return "filmes"; // Abre o filmes.html
+        return "filmes";
     }
 
-    // 2. TELA DE NOVO FILME 📝
     @GetMapping("/novo")
     public String novo(Model model) {
         model.addAttribute("filmeDto", new FilmeDto());
         model.addAttribute("categorias", categoriaRepository.findAll());
-        return "formulario"; // Abre o formulario.html
+        return "formulario";
     }
 
-    // 3. SALVAR FILME (POST) 💾
     @PostMapping("/novo")
     public String salvar(@Valid @ModelAttribute FilmeDto filmeDto, BindingResult result, Model model) {
         if (result.hasErrors()) {
             model.addAttribute("categorias", categoriaRepository.findAll());
             return "formulario";
         }
-
-        // Converte DTO para Entidade
         Filme filme = new Filme();
         if(filmeDto.getId() != null) filme.setId(filmeDto.getId());
-
         filme.setTitulo(filmeDto.getTitulo());
         filme.setDiretor(filmeDto.getDiretor());
         filme.setAnoLancamento(filmeDto.getAnoLancamento());
@@ -74,19 +57,14 @@ public class FilmeController {
         filme.setImagemUrl(filmeDto.getImagemUrl());
         filme.setClassificacao(filmeDto.getClassificacao());
         filme.setEstoque(filmeDto.getEstoque());
-
-        // Pega a categoria pelo ID
         filme.setCategoria(categoriaRepository.findById(filmeDto.getCategoriaId()).orElse(null));
-
         service.salvar(filme);
         return "redirect:/filmes";
     }
 
-    // 4. TELA DE EDITAR ✏️
     @GetMapping("/editar/{id}")
     public String editar(@PathVariable Long id, Model model) {
         Filme filme = service.buscarPorId(id);
-
         FilmeDto dto = new FilmeDto();
         dto.setId(filme.getId());
         dto.setTitulo(filme.getTitulo());
@@ -97,16 +75,34 @@ public class FilmeController {
         dto.setSinopse(filme.getSinopse());
         dto.setImagemUrl(filme.getImagemUrl());
         dto.setClassificacao(filme.getClassificacao());
-
         model.addAttribute("filmeDto", dto);
         model.addAttribute("categorias", categoriaRepository.findAll());
         return "formulario";
     }
 
-    // 5. DELETAR 🗑️
     @GetMapping("/deletar/{id}")
     public String deletar(@PathVariable Long id) {
         service.deletar(id);
         return "redirect:/filmes";
+    }
+
+    // --- ROTA DA IA (COM LOG DE ERRO) ---
+    @GetMapping("/buscar-omdb")
+    @ResponseBody
+    public FilmeDto buscarOmdb(@RequestParam String titulo) {
+        System.out.println("Recebendo pedido de busca para: " + titulo);
+        try {
+            FilmeDto resultado = omdbService.buscarFilme(titulo);
+            if (resultado == null) {
+                System.out.println("Filme não encontrado na API.");
+            } else {
+                System.out.println("Filme encontrado: " + resultado.getTitulo());
+            }
+            return resultado;
+        } catch (Exception e) {
+            System.out.println("ERRO GRAVE NO CONTROLLER AO BUSCAR FILME:");
+            e.printStackTrace();
+            return null;
+        }
     }
 }
