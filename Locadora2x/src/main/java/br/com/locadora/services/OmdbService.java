@@ -1,57 +1,64 @@
 package br.com.locadora.services;
 
 import br.com.locadora.dtos.FilmeDto;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-// Classe auxiliar para ler o JSON da API
-class OmdbResponse {
-    public String Title;
-    public String Director;
-    public String Year;
-    public String Plot;   // Sinopse
-    public String Poster; // Imagem
-    public String Rated;  // Classificação
-}
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 @Service
 public class OmdbService {
 
+    private final String API_KEY = "c914095f"; // Sua chave pública
 
-    private final String API_KEY = "c914095f";
-    // ------------------------------
-
-    public FilmeDto buscarFilmePeloTitulo(String titulo) {
+    public FilmeDto buscarFilme(String titulo) {
         try {
-            // 1. Prepara a URL (troca espaços por +)
-            String url = "http://www.omdbapi.com/?t=" + titulo.replace(" ", "+") + "&apikey=" + API_KEY;
+            // 1. Prepara a URL
+            String tituloFormatado = titulo.replace(" ", "+");
+            String endereco = "https://www.omdbapi.com/?t=" + tituloFormatado + "&apikey=" + API_KEY;
 
-            // 2. Faz a requisição na internet
-            RestTemplate restTemplate = new RestTemplate();
-            OmdbResponse resposta = restTemplate.getForObject(url, OmdbResponse.class);
+            // 2. Faz a requisição (Modo Java Moderno)
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder().uri(URI.create(endereco)).build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // 3. Se não achou nada, retorna null
-            if (resposta == null || resposta.Title == null) {
+            // 3. Lê o JSON
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode json = mapper.readTree(response.body());
+
+            // Se a API retornar erro
+            if (json.has("Error")) {
+                System.out.println("Erro na API OMDb: " + json.get("Error").asText());
                 return null;
             }
 
-            // 4. Converte a resposta da API para o DTO
+            // 4. Preenche o DTO
             FilmeDto dto = new FilmeDto();
-            dto.setTitulo(resposta.Title);
-            dto.setDiretor(resposta.Director);
-            dto.setSinopse(resposta.Plot);
-            dto.setImagemUrl(resposta.Poster);
+            dto.setTitulo(json.path("Title").asText());
+            dto.setDiretor(json.path("Director").asText());
+            dto.setSinopse(json.path("Plot").asText());
 
-            // Tratamento simples para o Ano (A API manda ex: "1999", removemos caracteres estranhos)
+            // Tratamento do Ano
             try {
-                String anoLimpo = resposta.Year.replaceAll("[^0-9]", "");
-                dto.setAnoLancamento(Integer.parseInt(anoLimpo));
+                String ano = json.path("Year").asText().replaceAll("[^0-9]", "");
+                dto.setAnoLancamento(ano.isEmpty() ? 2000 : Integer.parseInt(ano.substring(0, 4)));
             } catch (Exception e) {
-                dto.setAnoLancamento(2000); // Valor padrão se der erro no ano
+                dto.setAnoLancamento(2000);
             }
 
-            // Traduz a classificação (A API vem em inglês)
-            dto.setClassificacao(traduzirClassificacao(resposta.Rated));
+            // Tratamento da Imagem
+            String poster = json.path("Poster").asText();
+            dto.setImagemUrl(poster.equals("N/A") ? "" : poster);
+
+            // AQUI ESTÁ A MUDANÇA: Usando o tradutor
+            String classificacaoOriginal = json.path("Rated").asText();
+            dto.setClassificacao(traduzirClassificacao(classificacaoOriginal));
+
+            dto.setEstoque(3); // Padrão
 
             return dto;
 
@@ -61,9 +68,9 @@ public class OmdbService {
         }
     }
 
-    // Pequeno tradutor para ficar bonito no Brasil
+    // Método auxiliar para traduzir (Copiado do seu código antigo)
     private String traduzirClassificacao(String rated) {
-        if (rated == null) return "Livre";
+        if (rated == null || rated.equals("N/A")) return "Livre";
         switch (rated) {
             case "G": return "Livre";
             case "PG": return "10 anos";
