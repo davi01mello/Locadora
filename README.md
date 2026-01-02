@@ -92,8 +92,8 @@ O projeto foi construído seguindo as melhores práticas de arquitetura monolít
     spring.datasource.password=...
 
     # Chaves de API (Obtenha gratuitamente nos sites oficiais)
-    omdb.apikey=c914095f
-    gemini.api-key=AIzaSyD8lgQO8DWrq4S9KJqrAkprCgIPuTLOul4
+    omdb.apikey=XXXXXXXXXX
+    gemini.api-key=XXXXXXXX
     ```
 
 3.  **Execute o projeto:**
