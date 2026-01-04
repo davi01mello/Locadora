@@ -1,11 +1,10 @@
-# 🎬 Locadora System(ainda vou adicionar mais...)
+# 🎬 Locadora System
 
-> **Sistema inteligente de gestão de locadora desenvolvido com Java 21, Spring Boot e Google Gemini AI.**
+> **Sistema inteligente de gestão de locadora desenvolvido com Java 25, Spring Boot e Spring AI.**
 
-![Status do Projeto](https://img.shields.io/badge/Status-Finalizado-green) ![Java Version](https://img.shields.io/badge/Java-21-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3-brightgreen) ![License](https://img.shields.io/badge/License-MIT-blue)
+![Status do Projeto](https://img.shields.io/badge/Status-Em_Desenvolvimento-yellow) ![Java Version](https://img.shields.io/badge/Java-17-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3-brightgreen) ![License](https://img.shields.io/badge/License-MIT-blue)
 
 ![Dashboard Preview](prints/dashboard-preview.jpg)
-
 
 ---
 
@@ -13,39 +12,40 @@
 
 O **Locadora System** é uma aplicação Fullstack moderna projetada para automatizar e gerenciar o dia a dia de uma locadora de filmes.
 
-Diferente de sistemas comuns, este projeto utiliza **Inteligência Artificial em duas pontas**:
-1.  **Na Entrada de Dados:** Busca automática de metadados e capas de filmes via API externa (OMDb), eliminando cadastro manual.
-2.  **Na Gestão Estratégica:** Um consultor virtual powered by **Google Gemini AI** que analisa os gráficos de vendas e estoque para fornecer insights de negócio em tempo real para o dono da locadora.
+Diferente de sistemas comuns, este projeto está integrando **Inteligência Artificial** para modernizar a gestão:
+1.  **Na Entrada de Dados:** Busca automática de metadados e capas de filmes via API externa (OMDb).
+2.  **Na Gestão Estratégica:** Implementação de um consultor virtual utilizando **Spring AI + Google Gemini** para fornecer insights de negócio.
 
 ---
 
 ## ✨ Funcionalidades Principais
 
 ### 🧠 Inteligência Artificial (AI-Powered)
--   **Consultor Virtual (Gemini 1.5):** Analisa dados do banco (faturamento, categorias mais alugadas, inadimplência) e gera dicas de marketing e reposição de estoque com um clique.
--   **Auto-Complete de Filmes:** Ao digitar o nome do filme (ex: "Matrix"), o sistema busca automaticamente a capa, sinopse, diretor, ano e classificação indicativa traduzida.
+-   **Consultor Virtual (Em construção):** Integração com o modelo Gemini para analisar dados do banco e gerar dicas de marketing.
+-   **Auto-Complete de Filmes:** Ao digitar o nome do filme, o sistema busca automaticamente capa, sinopse, diretor e classificação via OMDb API.
 
 ### 🏢 Gestão Completa
--   **Dashboard Analítico:** Gráficos interativos (Chart.js) mostrando performance por categoria, top clientes e status de devoluções.
+-   **Dashboard Analítico:** Gráficos interativos (Chart.js) mostrando performance por categoria e status de devoluções.
 -   **Controle de Estoque:** Validação automática que impede aluguel de filmes esgotados.
--   **Fluxo de Locação:** Cálculo automático de multas por atraso (R$ 5,00/dia) e baixa/reposição de estoque em tempo real.
+-   **Fluxo de Locação:** Cálculo automático de multas por atraso e baixa/reposição de estoque em tempo real.
 
 ### 📄 Documentação & Segurança
 -   **Geração de Comprovantes:** Emissão automática de recibos em **PDF** para o cliente.
--   **Segurança Robusta:** Login e autenticação via Spring Security com proteção de rotas.
--   **Validações:** Regras de negócio fortes (CPF válido, datas coerentes).
+-   **Segurança Robusta:** Login e autenticação via Spring Security.
+-   **Validações:** Regras de negócio para integridade dos dados (CPF, datas, etc).
 
 ---
 
 ## 🛠️ Tech Stack (Tecnologias)
 
-O projeto foi construído seguindo as melhores práticas de arquitetura monolítica moderna.
+O projeto segue as melhores práticas de arquitetura monolítica moderna.
 
-* **Linguagem:** Java 21 (LTS)
+* **Linguagem:** Java 25 (LTS)
 * **Framework:** Spring Boot 3.2 (Web, Data JPA, Security, Validation)
 * **Banco de Dados:** MySQL 8
 * **IA & Integrações:**
-    * **Google Gemini API:** Para análise de dados e insights.
+    * **Spring AI:** Framework para integração simplificada com LLMs.
+    * **Google Gemini API:** Modelo de IA generativa.
     * **OMDb API:** Para catálogo de filmes.
     * **Spring RestClient:** Para consumo de APIs externas.
 * **Front-end:** Thymeleaf, Bootstrap 5, SweetAlert2, Chart.js.
@@ -64,14 +64,12 @@ O projeto foi construído seguindo as melhores práticas de arquitetura monolít
 |:---:|:---:|
 | ![Insights](prints/insights-ia.jpg) | ![PDF](prints/pdf-comprovante.jpg) |
 
-
-
 ---
 
 ## 🚀 Como Executar Localmente
 
 ### Pré-requisitos
-* Java 21 instalado (`java -version`).
+* Java 25 instalado (`java -version`).
 * MySQL rodando na porta 3306.
 * Chaves de API (Google Gemini e OMDb).
 
@@ -89,11 +87,11 @@ O projeto foi construído seguindo as melhores práticas de arquitetura monolít
     # Banco de Dados
     spring.datasource.url=jdbc:mysql://localhost:3306/locadora_db?createDatabaseIfNotExist=true
     spring.datasource.username=root
-    spring.datasource.password=...
+    spring.datasource.password=sua_senha
 
-    # Chaves de API (Obtenha gratuitamente nos sites oficiais)
-    omdb.apikey=XXXXXXXXXX
-    gemini.api-key=XXXXXXXX
+    # Chaves de API
+    omdb.apikey=SEU_TOKEN_OMDB
+    spring.ai.gemini.api-key=SEU_TOKEN_GEMINI
     ```
 
 3.  **Execute o projeto:**
@@ -111,7 +109,6 @@ O projeto foi construído seguindo as melhores práticas de arquitetura monolít
 ## 🤝 Autor
 
 Desenvolvido com dedicação por **Davi Mello**.
-
 
 [![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/davi01mello)
 
