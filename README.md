@@ -58,7 +58,7 @@ O projeto segue as melhores práticas de arquitetura monolítica moderna.
 
 | Tela de Login | Cadastro com IA |
 |:---:|:---:|
-| ![Login](prints/login.png) | ![Cadastro](prints/cadastro-filme.png) |
+| ![Contorle de locação](prints/locaçao.png) | ![Cadastro de filmes](prints/cadastro-filme.png) |
 
 | Dashboard com Insights | Comprovante PDF |
 |:---:|:---:|
