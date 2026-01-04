@@ -4,7 +4,7 @@
 
 ![Status do Projeto](https://img.shields.io/badge/Status-Em_Desenvolvimento-yellow) ![Java Version](https://img.shields.io/badge/Java-25-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3-brightgreen) ![License](https://img.shields.io/badge/License-MIT-blue)
 
-![Dashboard Preview](prints/dashboard-preview.jpg)
+![Dashboard Preview](prints/dashboard-preview.png)
 
 ---
 
@@ -58,11 +58,11 @@ O projeto segue as melhores práticas de arquitetura monolítica moderna.
 
 | Tela de Login | Cadastro com IA |
 |:---:|:---:|
-| ![Login](prints/login.jpg) | ![Cadastro](prints/cadastro-filme.jpg) |
+| ![Login](prints/login.png) | ![Cadastro](prints/cadastro-filme.png) |
 
 | Dashboard com Insights | Comprovante PDF |
 |:---:|:---:|
-| ![Insights](prints/insights-ia.jpg) | ![PDF](prints/pdf-comprovante.jpg) |
+| ![Insights](prints/insights-ia.png) | ![PDF](prints/pdf-comprovante.png) |
 
 ---
 
