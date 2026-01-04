@@ -12,7 +12,7 @@
     <style>
         body { font-family: 'Poppins', sans-serif; background-color: #f0f2f5; }
 
-        /* --- ESTILOS DO DASHBOARD (Mantidos) --- */
+        /* --- ESTILOS DO DASHBOARD --- */
         .hero-section {
             background: linear-gradient(135deg, #2c3e50, #4ca1af);
             color: white; padding: 3rem 0;
@@ -36,9 +36,7 @@
         .chart-container { position: relative; height: 250px; width: 100%; display: flex; justify-content: center; }
         .chart-title { font-size: 1rem; font-weight: 700; color: #34495e; margin-bottom: 1rem; text-align: center; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px;}
 
-        /* --- 💬 NOVO CHAT FLUTUANTE --- */
-
-        /* Botão Redondo no Canto */
+        /* --- 💬 ESTILOS DO CHAT --- */
         .chat-btn-floating {
             position: fixed; bottom: 30px; right: 30px;
             width: 65px; height: 65px;
@@ -51,21 +49,21 @@
         }
         .chat-btn-floating:hover { transform: scale(1.1); box-shadow: 0 8px 25px rgba(52, 152, 219, 0.6); }
 
-        /* Janela do Chat */
         .chat-window {
             position: fixed; bottom: 110px; right: 30px;
             width: 380px; height: 500px;
             background: white; border-radius: 20px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            display: none; /* Começa escondido */
-            flex-direction: column; z-index: 9999;
+            display: none; flex-direction: column; z-index: 9999;
             overflow: hidden; border: 1px solid #eee;
-            animation: slideIn 0.3s ease-out;
+            transition: all 0.3s ease; /* Animação suave */
         }
 
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* CLASSE DE TELA CHEIA 🖥️ */
+        .chat-window.fullscreen {
+            width: 95%; height: 90%;
+            bottom: 5%; right: 2.5%;
+            border-radius: 15px;
         }
 
         .chat-header {
@@ -83,12 +81,14 @@
             display: flex; gap: 10px; align-items: center;
         }
 
-        /* Balões de mensagem */
-        .msg { padding: 10px 15px; border-radius: 15px; max-width: 85%; font-size: 0.9rem; line-height: 1.5; word-wrap: break-word;}
+        .msg { padding: 12px 16px; border-radius: 15px; max-width: 85%; font-size: 0.95rem; line-height: 1.5; word-wrap: break-word;}
         .msg-bot { background-color: white; border: 1px solid #e9ecef; align-self: flex-start; border-bottom-left-radius: 2px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .msg-user { background-color: #3498db; color: white; align-self: flex-end; border-bottom-right-radius: 2px; box-shadow: 0 2px 5px rgba(52, 152, 219, 0.3); }
-
         .typing-indicator { font-size: 0.75rem; color: #888; font-style: italic; display: none; margin-left: 10px; margin-bottom: 5px; }
+
+        /* Botões do header */
+        .chat-controls .btn-icon { color: white; background: none; border: none; font-size: 1.1rem; padding: 0 5px; transition: 0.2s; }
+        .chat-controls .btn-icon:hover { color: #3498db; transform: scale(1.1); }
     </style>
 </head>
 <body>
@@ -178,7 +178,8 @@
 </div>
 
 <button class="chat-btn-floating" onclick="toggleChat()">
-    <i class="bi bi-robot"></i> </button>
+    <i class="bi bi-robot"></i>
+</button>
 
 <div class="chat-window" id="chatWindow">
     <div class="chat-header">
@@ -186,18 +187,29 @@
             <i class="bi bi-stars me-2 text-warning"></i>
             <span class="fw-bold">Consultor IA</span>
         </div>
-        <button onclick="toggleChat()" class="btn btn-sm btn-close btn-close-white"></button>
+
+        <div class="chat-controls">
+            <button onclick="toggleFullScreen()" class="btn-icon" title="Tela Cheia">
+                <i class="bi bi-arrows-fullscreen"></i>
+            </button>
+            <button onclick="toggleChat()" class="btn-icon" title="Fechar">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
     </div>
 
     <div class="chat-body" id="chatBody">
         <div class="msg msg-bot">
-            Olá! Sou seu assistente virtual. 🤖<br>
-            Posso consultar estoque, verificar multas e listar os melhores clientes.<br>
-            <b>Como posso ajudar hoje?</b>
+            Olá! Sou seu <b>Consultor Inteligente</b>. 🤖<br><br>
+            Tenho acesso a todos os dados da locadora. Posso te ajudar com:<br>
+            📊 <b>Insights:</b> "Analise o desempenho da loja"<br>
+            🔍 <b>Estoque:</b> "Temos Matrix disponível?"<br>
+            👥 <b>Clientes:</b> "Quem são os melhores clientes?"<br><br>
+            Como posso ajudar hoje?
         </div>
     </div>
 
-    <div class="typing-indicator" id="typingIndicator">Consultando banco de dados...</div>
+    <div class="typing-indicator" id="typingIndicator">Analisando dados...</div>
 
     <div class="chat-footer">
         <input type="text" id="userInput" class="form-control" placeholder="Digite sua pergunta..." onkeypress="handleEnter(event)">
@@ -208,11 +220,35 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script th:inline="javascript">
-    /* --- 1. LÓGICA DO CHAT 🧠 --- */
+    /* --- 1. LÓGICA DO CHAT E COMANDOS EXTERNOS 🧠 --- */
     const chatWindow = document.getElementById('chatWindow');
     const chatBody = document.getElementById('chatBody');
     const userInput = document.getElementById('userInput');
     const typingIndicator = document.getElementById('typingIndicator');
+
+    // VERIFICA SE VEIO UM COMANDO DE OUTRA PÁGINA (Ex: Botão Cobrar)
+    document.addEventListener("DOMContentLoaded", function() {
+        const params = new URLSearchParams(window.location.search);
+        const comando = params.get('comando');
+        const id = params.get('id');
+
+        if (comando === 'cobrar' && id) {
+            // 1. Abre o chat
+            if (chatWindow.style.display === 'none' || chatWindow.style.display === '') {
+                chatWindow.style.display = 'flex';
+            }
+
+            // 2. Digita a pergunta para a IA
+            const pergunta = "Gere uma mensagem curta e educada de cobrança para o WhatsApp referente à locação #" + id;
+            userInput.value = pergunta;
+
+            // 3. Envia automaticamente
+            sendMessage();
+
+            // 4. Limpa a URL para não ficar repetindo se der F5
+            window.history.replaceState({}, document.title, "/");
+        }
+    });
 
     function toggleChat() {
         if (chatWindow.style.display === 'none' || chatWindow.style.display === '') {
@@ -220,6 +256,19 @@
             userInput.focus();
         } else {
             chatWindow.style.display = 'none';
+        }
+    }
+
+    // Função de Tela Cheia
+    function toggleFullScreen() {
+        chatWindow.classList.toggle('fullscreen');
+        const icon = document.querySelector('.bi-arrows-fullscreen');
+        if (chatWindow.classList.contains('fullscreen')) {
+            icon.classList.remove('bi-arrows-fullscreen');
+            icon.classList.add('bi-arrows-angle-contract');
+        } else {
+            icon.classList.remove('bi-arrows-angle-contract');
+            icon.classList.add('bi-arrows-fullscreen');
         }
     }
 
@@ -231,7 +280,6 @@
         const text = userInput.value.trim();
         if (!text) return;
 
-        // Adiciona mensagem do usuário
         addMessage(text, 'msg-user');
         userInput.value = '';
         userInput.disabled = true;
@@ -239,22 +287,21 @@
         chatBody.scrollTop = chatBody.scrollHeight;
 
         try {
-            // Chama o Backend (AgentController)
             const response = await fetch('/api/chat', {
                 method: 'POST',
-                headers: { 'Content-Type': 'text/plain' }, // Importante mandar como texto simples
+                headers: { 'Content-Type': 'text/plain' },
                 body: text
             });
 
             if (response.ok) {
                 const data = await response.text();
-                addMessage(data, 'msg-bot'); // IA respondeu
+                addMessage(data, 'msg-bot');
             } else {
-                addMessage("Desculpe, tive um erro técnico. Tente novamente.", 'msg-bot');
+                addMessage("Desculpe, tive um erro técnico.", 'msg-bot');
             }
         } catch (error) {
             console.error(error);
-            addMessage("Erro de conexão com o servidor.", 'msg-bot');
+            addMessage("Erro de conexão.", 'msg-bot');
         } finally {
             userInput.disabled = false;
             userInput.focus();
@@ -266,12 +313,12 @@
     function addMessage(text, className) {
         const div = document.createElement('div');
         div.className = `msg ${className}`;
-        // Converte quebras de linha em <br> para ficar bonito
         div.innerHTML = text.replace(/\n/g, '<br>');
         chatBody.appendChild(div);
+        chatBody.scrollTop = chatBody.scrollHeight;
     }
 
-    /* --- 2. GRÁFICOS DO DASHBOARD (Mantidos) --- */
+    /* --- 2. GRÁFICOS DO DASHBOARD --- */
     new Chart(document.getElementById('chartCategoria'), {
         type: 'doughnut',
         data: {
@@ -296,11 +343,7 @@
                 borderRadius: 5
             }]
         },
-        options: {
-            indexAxis: 'y',
-            plugins: { legend: { display: false } },
-            maintainAspectRatio: false
-        }
+        options: { indexAxis: 'y', plugins: { legend: { display: false } }, maintainAspectRatio: false }
     });
 
     new Chart(document.getElementById('chartStatus'), {
