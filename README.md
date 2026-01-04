@@ -2,7 +2,7 @@
 
 > **Sistema inteligente de gestão de locadora desenvolvido com Java 25, Spring Boot e Spring AI.**
 
-![Status do Projeto](https://img.shields.io/badge/Status-Em_Desenvolvimento-yellow) ![Java Version](https://img.shields.io/badge/Java-17-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3-brightgreen) ![License](https://img.shields.io/badge/License-MIT-blue)
+![Status do Projeto](https://img.shields.io/badge/Status-Em_Desenvolvimento-yellow) ![Java Version](https://img.shields.io/badge/Java-25-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3-brightgreen) ![License](https://img.shields.io/badge/License-MIT-blue)
 
 ![Dashboard Preview](prints/dashboard-preview.jpg)
 
